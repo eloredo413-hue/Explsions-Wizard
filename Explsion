@@ -32,24 +32,52 @@ print("[Explosion] Normal style (default Roblox).")
 	local SCRIPT_2006 = [==[
 if _G.BP_ExplosionHook then pcall(function() _G.BP_ExplosionHook:Disconnect() end) end
 local Debris = game:GetService("Debris")
+local NEON = Enum.Material.Neon
+local RED = BrickColor.new("Really red")
+-- The ball has to stay neon red. Other addons change parts as they are added to the
+-- workspace (Hammer stuff 1's "Plastic" turns every material into SmoothPlastic, and the
+-- old-colors limiters snap colors), so the ball puts its own material and color back
+-- whenever something else changes them.
+local function lockLook(part)
+    local fixing = false
+    local function restore()
+        if fixing or not part.Parent then return end
+        fixing = true
+        pcall(function()
+            if part.Material ~= NEON then part.Material = NEON end
+            if part.MaterialVariant ~= "" then part.MaterialVariant = "" end
+            if part.BrickColor ~= RED then part.BrickColor = RED end
+        end)
+        fixing = false
+    end
+    part:GetPropertyChangedSignal("Material"):Connect(restore)
+    part:GetPropertyChangedSignal("MaterialVariant"):Connect(restore)
+    part:GetPropertyChangedSignal("Color"):Connect(restore)
+end
 _G.BP_ExplosionHook = workspace.DescendantAdded:Connect(function(ex)
     if ex:IsA("Explosion") then
         ex.Visible = false
         local exPart = Instance.new("Part")
+        exPart.Name = "BP_Explosion2006"
         local diameter = math.max(ex.BlastRadius * 2, 4)
         exPart.Size = Vector3.new(diameter, diameter, diameter)
         exPart.Shape = Enum.PartType.Ball
-        exPart.BrickColor = BrickColor.new("Really red")
-        exPart.Material = Enum.Material.Neon
+        exPart.BrickColor = RED
+        exPart.Material = NEON
         exPart.TopSurface = Enum.SurfaceType.Smooth
         exPart.BottomSurface = Enum.SurfaceType.Smooth
         exPart.LeftSurface = Enum.SurfaceType.Smooth
         exPart.RightSurface = Enum.SurfaceType.Smooth
         exPart.FrontSurface = Enum.SurfaceType.Smooth
         exPart.BackSurface = Enum.SurfaceType.Smooth
+        exPart.CastShadow = false
         exPart.Position = ex.Position
         exPart.CanCollide = false
+        exPart.CanTouch = false
+        exPart.CanQuery = false
         exPart.Anchored = true
+        exPart:SetAttribute("BP_KeepMaterial", true)
+        lockLook(exPart)
         exPart.Parent = workspace
         Debris:AddItem(exPart, 0.2)
     end
