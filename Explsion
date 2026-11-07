@@ -33,8 +33,12 @@ print("[Explosion] Normal style (default Roblox).")
 if _G.BP_ExplosionHook then pcall(function() _G.BP_ExplosionHook:Disconnect() end) end
 local Debris = game:GetService("Debris")
 local NEON = Enum.Material.Neon
-local RED = BrickColor.new("Really red")
--- The ball has to stay neon red. Other addons change parts as they are added to the
+-- Neon glows more the brighter its color is. "Really red" (255, 0, 0) gave the ball a big
+-- glow, which the old explosions didn't have. "Crimson" (151, 0, 0) is a darker red: neon
+-- still shows it as a solid flat red, but with much less glow. For even less glow, try
+-- "Maroon" (117, 0, 0).
+local RED = BrickColor.new("Crimson")
+-- The ball has to stay neon and keep its color. Other addons change parts as they are added to the
 -- workspace (Hammer stuff 1's "Plastic" turns every material into SmoothPlastic, and the
 -- old-colors limiters snap colors), so the ball puts its own material and color back
 -- whenever something else changes them.
